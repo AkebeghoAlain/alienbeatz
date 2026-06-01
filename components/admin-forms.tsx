@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useTransition } from "react";
 import { createBeat, createSamplePack, updateSettings } from "@/app/admin/actions";
 import type { SiteSettings } from "@/lib/types";
 
@@ -5,8 +8,44 @@ const input = "h-11 rounded-md border border-white/10 bg-black/25 px-3 text-sm t
 const textarea = "rounded-md border border-white/10 bg-black/25 p-3 text-sm text-white outline-none placeholder:text-white/35";
 
 export function BeatForm() {
+  const [isPending, startTransition] = useTransition();
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [audioPreview, setAudioPreview] = useState<string | null>(null);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    startTransition(() => {
+      // call server action; redirect will happen on success
+      // @ts-ignore server action
+      createBeat(fd as any);
+    });
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, files } = e.currentTarget;
+    if (!files?.length) return;
+    const file = files[0];
+    const url = URL.createObjectURL(file);
+
+    if (name === "cover_image") {
+      setCoverPreview((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return url;
+      });
+    }
+
+    if (name === "preview_audio") {
+      setAudioPreview((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return url;
+      });
+    }
+  }
+
   return (
-    <form action={createBeat} className="glass grid gap-4 rounded-lg p-5">
+    <form onSubmit={onSubmit} className="glass grid gap-4 rounded-lg p-5">
       <h2 className="text-xl font-bold text-white">Upload New Beat</h2>
       <div className="grid gap-4 md:grid-cols-2">
         <input name="title" required placeholder="Beat title" className={input} />
@@ -19,8 +58,30 @@ export function BeatForm() {
       <textarea name="description" rows={4} placeholder="Description" className={textarea} />
       <input name="tags" placeholder="Tags separated by commas" className={input} />
       <div className="grid gap-4 md:grid-cols-2">
-        <FileInput name="cover_image" label="Cover image" accept="image/*" />
-        <FileInput name="preview_audio" label="Preview audio" accept="audio/*" />
+        <FileInput name="cover_image" label="Cover image" accept="image/*" onChange={handleFileChange} />
+        <FileInput name="preview_audio" label="Preview audio" accept="audio/*" onChange={handleFileChange} />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-md border border-white/10 bg-black/25 p-3 text-sm text-white/60">
+          <p className="mb-2 font-semibold text-white">Cover preview</p>
+          {coverPreview ? (
+            <img src={coverPreview} alt="Cover preview" className="h-48 w-full rounded-md object-cover" />
+          ) : (
+            <div className="flex h-48 items-center justify-center rounded-md border border-dashed border-white/10 bg-white/5 text-xs text-white/50">
+              No cover selected
+            </div>
+          )}
+        </div>
+        <div className="rounded-md border border-white/10 bg-black/25 p-3 text-sm text-white/60">
+          <p className="mb-2 font-semibold text-white">Preview audio</p>
+          {audioPreview ? (
+            <audio controls src={audioPreview} className="w-full" />
+          ) : (
+            <div className="flex h-48 items-center justify-center rounded-md border border-dashed border-white/10 bg-white/5 text-xs text-white/50">
+              No audio selected
+            </div>
+          )}
+        </div>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <input name="basic_price" type="number" placeholder="Basic price" className={input} />
@@ -34,7 +95,19 @@ export function BeatForm() {
         <label className="flex items-center gap-2"><input name="featured" type="checkbox" className="accent-plasma" /> Featured</label>
         <label className="flex items-center gap-2"><input name="availability" type="checkbox" defaultChecked className="accent-plasma" /> Available</label>
       </div>
-      <button className="rounded-md bg-acid px-4 py-3 text-sm font-bold text-void hover:bg-white">Save Beat</button>
+      <button disabled={isPending} className="rounded-md bg-acid px-4 py-3 text-sm font-bold text-void hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        {isPending ? (
+          <>
+            <svg className="h-4 w-4 animate-spin text-void" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            Saving...
+          </>
+        ) : (
+          "Save Beat"
+        )}
+      </button>
     </form>
   );
 }
@@ -82,11 +155,27 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function FileInput({ name, label, accept }: { name: string; label: string; accept: string }) {
+function FileInput({
+  name,
+  label,
+  accept,
+  onChange
+}: {
+  name: string;
+  label: string;
+  accept: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
   return (
     <label className="grid gap-2 rounded-md border border-white/10 bg-black/25 p-3 text-sm text-white/60">
       {label}
-      <input name={name} type="file" accept={accept} className="text-xs text-white/55 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-bold file:text-void" />
+      <input
+        name={name}
+        type="file"
+        accept={accept}
+        onChange={onChange}
+        className="text-xs text-white/55 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-bold file:text-void"
+      />
     </label>
   );
 }

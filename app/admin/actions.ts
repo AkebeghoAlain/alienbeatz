@@ -45,28 +45,50 @@ export async function createBeat(formData: FormData) {
   const cover = await uploadFile("cover-images", formData.get("cover_image") as File | null, "beats");
   const audio = await uploadFile("beat-previews", formData.get("preview_audio") as File | null, "beats");
 
-  const { data: beat, error } = await supabase
-    .from("beats")
-    .insert({
-      title,
-      slug: slugify(String(formData.get("slug") || title)),
-      description: String(formData.get("description") || ""),
-      genre: String(formData.get("genre")),
-      bpm: Number(formData.get("bpm")),
-      musical_key: String(formData.get("musical_key")),
-      mood: String(formData.get("mood") || ""),
-      tags: String(formData.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
-      cover_image: cover,
-      preview_audio: audio,
-      featured: formData.get("featured") === "on",
-      availability: formData.get("availability") === "on"
-    })
-    .select("id")
-    .single();
+  const baseSlug = slugify(String(formData.get("slug") || title));
+  let beat = null as any;
+  let slug = baseSlug;
 
-  if (error) throw new Error(error.message);
+  // Try inserting up to 5 times, regenerating the slug if there's a unique constraint conflict
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data, error } = await supabase
+      .from("beats")
+      .insert({
+        title,
+        slug,
+        description: String(formData.get("description") || ""),
+        genre: String(formData.get("genre")),
+        bpm: Number(formData.get("bpm")),
+        musical_key: String(formData.get("musical_key")),
+        mood: String(formData.get("mood") || ""),
+        tags: String(formData.get("tags") || "").split(",").map((tag) => tag.trim()).filter(Boolean),
+        cover_image: cover,
+        preview_audio: audio,
+        featured: formData.get("featured") === "on",
+        availability: formData.get("availability") === "on"
+      })
+      .select("id")
+      .single();
 
-  await supabase.from("licenses").insert([
+    if (!error) {
+      beat = data;
+      break;
+    }
+
+    // If slug conflict, generate a new slug and retry
+    const msg = String(error?.message || "");
+    if (msg.includes("duplicate key") || msg.includes("unique constraint") || msg.includes("beats_slug_key")) {
+      slug = `${baseSlug}-${crypto.randomUUID().split("-")[0]}`;
+      continue;
+    }
+
+    // For other errors, abort
+    throw new Error(error.message);
+  }
+
+  if (!beat) throw new Error("Could not create beat after multiple slug attempts.");
+
+  const { error: licensesError } = await supabase.from("licenses").insert([
     {
       beat_id: beat.id,
       license_name: "Basic",
@@ -87,10 +109,13 @@ export async function createBeat(formData: FormData) {
     }
   ]);
 
+  if (licensesError) throw new Error(licensesError.message);
+
   revalidatePath("/");
   revalidatePath("/beats");
   revalidatePath("/admin");
-  redirect("/admin/beats");
+  // Redirect with a query flag so the admin UI can show a success prompt
+  redirect("/admin/beats?created=1");
 }
 
 export async function deleteBeat(formData: FormData) {

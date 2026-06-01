@@ -1,5 +1,6 @@
 import { deleteBeat, toggleBeat } from "@/app/admin/actions";
 import { BeatForm } from "@/components/admin-forms";
+import AdminToast from "@/components/admin-toast";
 import { getBeats } from "@/lib/data";
 
 export default async function AdminBeatsPage() {
@@ -7,6 +8,7 @@ export default async function AdminBeatsPage() {
 
   return (
     <div className="space-y-8">
+      <AdminToast />
       <div>
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-acid">Catalog</p>
         <h1 className="font-display text-3xl font-black uppercase text-white">Beat Management</h1>
