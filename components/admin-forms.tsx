@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useFormStatus } from "react";
 import { createBeat, createSamplePack, updateSettings } from "@/app/admin/actions";
 import type { SiteSettings } from "@/lib/types";
 
@@ -8,20 +8,9 @@ const input = "h-11 rounded-md border border-white/10 bg-black/25 px-3 text-sm t
 const textarea = "rounded-md border border-white/10 bg-black/25 p-3 text-sm text-white outline-none placeholder:text-white/35";
 
 export function BeatForm() {
-  const [isPending, startTransition] = useTransition();
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    startTransition(() => {
-      // call server action; redirect will happen on success
-      // @ts-ignore server action
-      createBeat(fd as any);
-    });
-  }
+  const { pending } = useFormStatus();
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, files } = e.currentTarget;
@@ -45,7 +34,7 @@ export function BeatForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="glass grid gap-4 rounded-lg p-5">
+    <form action={createBeat} className="glass grid gap-4 rounded-lg p-5">
       <h2 className="text-xl font-bold text-white">Upload New Beat</h2>
       <div className="grid gap-4 md:grid-cols-2">
         <input name="title" required placeholder="Beat title" className={input} />
@@ -95,8 +84,8 @@ export function BeatForm() {
         <label className="flex items-center gap-2"><input name="featured" type="checkbox" className="accent-plasma" /> Featured</label>
         <label className="flex items-center gap-2"><input name="availability" type="checkbox" defaultChecked className="accent-plasma" /> Available</label>
       </div>
-      <button disabled={isPending} className="rounded-md bg-acid px-4 py-3 text-sm font-bold text-void hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-        {isPending ? (
+      <button disabled={pending} className="rounded-md bg-acid px-4 py-3 text-sm font-bold text-void hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        {pending ? (
           <>
             <svg className="h-4 w-4 animate-spin text-void" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
