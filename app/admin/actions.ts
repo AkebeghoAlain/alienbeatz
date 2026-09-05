@@ -208,13 +208,16 @@ export async function updateInquiryStatus(formData: FormData) {
 
 export async function updateLicense(formData: FormData) {
   const supabase = await requireSupabase();
-  await supabase
-    .from("licenses")
-    .update({
-      price: Number(formData.get("price")),
-      rights_description: String(formData.get("rights_description"))
-    })
-    .eq("id", String(formData.get("id")));
+  const payload: Record<string, any> = {
+    rights_description: String(formData.get("rights_description"))
+  };
+  const priceRaw = formData.get("price");
+  if (priceRaw !== null) {
+    const p = Number(priceRaw);
+    if (!Number.isNaN(p)) payload.price = p;
+  }
+
+  await supabase.from("licenses").update(payload).eq("id", String(formData.get("id")));
   revalidatePath("/admin/licenses");
   revalidatePath("/beats");
 }

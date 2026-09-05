@@ -5,7 +5,6 @@ import { AudioPlayer } from "@/components/audio-player";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { Waveform } from "@/components/waveform";
 import type { BeatWithLicenses } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export function BeatCard({ beat, whatsapp }: { beat: BeatWithLicenses; whatsapp?: string | null }) {
   const defaultLicense = beat.licenses.find((license) => license.license_name === "Premium") ?? beat.licenses[0];
@@ -38,8 +37,8 @@ export function BeatCard({ beat, whatsapp }: { beat: BeatWithLicenses; whatsapp?
         <div className="mt-3 flex items-center justify-between gap-2">
           <Waveform />
           <div className="text-right">
-            <p className="text-[11px] text-white/45">From</p>
-            <p className="font-semibold text-white text-sm">{defaultLicense ? formatPrice(defaultLicense.price) : "Ask"}</p>
+            <p className="text-[11px] text-white/45">License</p>
+            <p className="font-semibold text-white text-sm">{defaultLicense?.license_name ?? "Select"}</p>
           </div>
         </div>
         
@@ -47,13 +46,7 @@ export function BeatCard({ beat, whatsapp }: { beat: BeatWithLicenses; whatsapp?
           <AudioPlayer src={beat.preview_audio} title={beat.title} compact />
         </div>
         
-        <WhatsAppButton
-          phone={whatsapp}
-          beatTitle={beat.title}
-          licenseName={defaultLicense?.license_name}
-          price={defaultLicense?.price}
-          className="w-full mt-2 text-sm py-1.5"
-        />
+        <WhatsAppButton phone={whatsapp} beatTitle={beat.title} licenseName={defaultLicense?.license_name} className="w-full mt-2 text-sm py-1.5" />
       </div>
     </article>
   );

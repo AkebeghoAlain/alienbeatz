@@ -47,9 +47,8 @@ export function buildWhatsAppUrl(input: {
           "",
           `Beat: ${input.beatTitle ?? "Selected beat"}`,
           `License: ${input.licenseName ?? "Premium"}`,
-          `Price: ${typeof input.price === "number" ? formatPrice(input.price) : "To be confirmed"}`,
           "",
-          "Please send payment instructions."
+          "Let's discuss pricing and payment details on WhatsApp."
         ];
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join("\n"))}`;

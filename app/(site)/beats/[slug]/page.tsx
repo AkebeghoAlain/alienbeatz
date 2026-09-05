@@ -5,7 +5,6 @@ import { Calendar, Gauge, KeyRound, Tags } from "lucide-react";
 import { AudioPlayer } from "@/components/audio-player";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getBeatBySlug, getSettings } from "@/lib/data";
-import { formatPrice } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -59,18 +58,17 @@ export default async function BeatDetailsPage({ params }: Props) {
           </div>
 
           <div className="mt-8">
-            <h2 className="mb-4 text-xl font-black text-white">License Pricing</h2>
+            <h2 className="mb-4 text-xl font-black text-white">Licenses</h2>
             <div className="grid gap-4">
               {beat.licenses.map((license) => (
                 <div key={license.id} className="glass grid gap-4 rounded-lg p-5 md:grid-cols-[1fr_auto] md:items-center">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
                       <h3 className="text-lg font-bold text-white">{license.license_name}</h3>
-                      <span className="rounded-full bg-acid/15 px-3 py-1 text-sm font-bold text-acid">{formatPrice(license.price)}</span>
                     </div>
                     <p className="mt-2 text-sm leading-6 text-white/58">{license.rights_description}</p>
                   </div>
-                  <WhatsAppButton phone={settings.whatsapp_number} beatTitle={beat.title} licenseName={license.license_name} price={license.price} />
+                  <WhatsAppButton phone={settings.whatsapp_number} beatTitle={beat.title} licenseName={license.license_name} />
                 </div>
               ))}
             </div>

@@ -20,7 +20,7 @@ export default async function AdminOverviewPage() {
       <div className="glass rounded-lg p-5">
         <h2 className="text-xl font-bold text-white">Manual Sales Workflow</h2>
         <p className="mt-2 text-sm leading-6 text-white/58">
-          Customers preview beats, select Basic, Premium, or Exclusive licenses, and open WhatsApp with the beat title, license, and price already filled in. No payment processor is integrated.
+          Customers preview beats, select Basic, Premium, or Exclusive licenses, and open WhatsApp with the beat title and license prefilled so pricing can be discussed directly. No payment processor is integrated.
         </p>
       </div>
     </div>

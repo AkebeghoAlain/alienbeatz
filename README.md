@@ -7,9 +7,9 @@ The sales flow is intentionally WhatsApp-first. Customers browse beats, preview 
 ## Features
 
 - Premium responsive public website with home, beat store, beat detail, sample packs, about, and contact pages
-- Search, genre filter, mood filter, BPM sorting, beat metadata, tags, and license pricing
+-- Search, genre filter, mood filter, BPM sorting, beat metadata, tags, and license selection
 - Modern audio player with play/pause, progress, and volume controls
-- Dynamic WhatsApp purchase links with beat title, license name, and price
+-- Dynamic WhatsApp purchase links with beat title and license name (pricing discussed on WhatsApp)
 - Supabase Auth protected admin dashboard
 - Admin beat uploads with cover images and preview audio
 - Admin sample pack uploads with cover images, preview audio, and ZIP files
@@ -108,9 +108,8 @@ I want to purchase this beat.
 
 Beat: Midnight Vibes
 License: Premium
-Price: XAF 75
 
-Please send payment instructions.
+Let's discuss pricing and payment details on WhatsApp.
 ```
 
 ## Deployment

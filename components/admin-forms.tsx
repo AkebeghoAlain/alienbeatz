@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useFormStatus } from "react";
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { createBeat, createSamplePack, updateSettings } from "@/app/admin/actions";
 import type { SiteSettings } from "@/lib/types";
 
@@ -72,11 +73,7 @@ export function BeatForm() {
           )}
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        <input name="basic_price" type="number" placeholder="Basic price" className={input} />
-        <input name="premium_price" type="number" placeholder="Premium price" className={input} />
-        <input name="exclusive_price" type="number" placeholder="Exclusive price" className={input} />
-      </div>
+      {/* Prices are managed privately; pricing inputs removed to discuss on WhatsApp */}
       <textarea name="basic_rights" rows={2} placeholder="Basic rights description" className={textarea} />
       <textarea name="premium_rights" rows={2} placeholder="Premium rights description" className={textarea} />
       <textarea name="exclusive_rights" rows={2} placeholder="Exclusive rights description" className={textarea} />
